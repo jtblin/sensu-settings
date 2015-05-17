@@ -112,7 +112,20 @@ module Sensu
         end
       end
 
-      # Load settings from files in a directory. Files may be in
+      # Save settings from a JSON file.
+      #
+      # @param [String] file path.
+      def save_file(file, content)
+        if File.file?(file) && File.readable?(file)
+          warning("config file already exists and is readable", :file => file)
+          warning("ignoring config file", :file => file)
+        else
+          json = MultiJson.dump(content)
+          File.write(file, json)
+        end
+      end
+
+        # Load settings from files in a directory. Files may be in
       # nested directories.
       #
       # @param [String] directory path.
@@ -134,9 +147,9 @@ module Sensu
       # Validate the loaded settings.
       #
       # @return [Array] validation failures.
-      def validate
+      def validate(settings=@settings)
         validator = Validator.new
-        validator.run(@settings, sensu_service_name)
+        validator.run(settings, sensu_service_name)
       end
 
       private
